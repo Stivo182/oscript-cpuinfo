@@ -27,10 +27,10 @@ opm install cpuinfo
 Пример вывода:
 ```
 Краткое описание:
-AMD Ryzen 5 4600H with Radeon Graphics
+Intel Core i7-8700 CPU 3.20GHz (Coffee Lake)
 
 Полное описание:
-AMD Ryzen 5 4600H with Radeon Graphics 3.00GHz, 1 CPU, 12 logical and 6 physical cores
+Intel Core i7-8700 CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 12 logical and 6 physical cores
 ```
 
 ## Программный интерфейс
