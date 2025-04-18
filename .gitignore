@@ -1,0 +1,4 @@
+.vscode/
+oscript_modules/
+out/
+*.ospx
