@@ -1,18 +1,68 @@
 name: Тестирование
 
-on:
-  push:
-  pull_request:
+on: 
   workflow_dispatch:
+    inputs:
+      oscript_version:
+        required: false
+        default: "default"
+        type: string
+      test_script_path:
+        required: false
+        type: string
+        default: ./tasks/test.os
+      additional_oscript_packages:
+        description: Package list to install, space separated.
+        type: string
+        required: false
+        default: ""
 
 jobs:
-  test:
+  build:
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: ['macos-13']
-        oscript_version: ['stable', 'dev']
-    uses: autumn-library/workflows/.github/workflows/test.yml@main
-    with:
-      oscript_version: ${{ matrix.oscript_version }}
-      os: ${{ matrix.os }}
+        oscript_version: ['dev', 'stable']
+        
+    steps:
+      - name: Актуализация
+        uses: actions/checkout@v4
+
+      - name: Установка свойств git
+        shell: bash
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      
+      - name: Вычисление версии OneScript
+        shell: bash
+        id: extract_oscript_version
+        run: |
+          set -ex
+          if [ "${{ inputs.oscript_version }}" = "default" ]
+          then
+            extracted_version=$(cat packagedef | grep ".ВерсияСреды(" | sed 's|[^"]*"||' | sed -r 's/".+//' || true)
+            version="${extracted_version:-stable}"
+          else
+            version="${{ inputs.oscript_version }}"
+          fi
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Установка OneScript
+        uses: otymko/setup-onescript@v1.5
+        with:
+          version: ${{ steps.extract_oscript_version.outputs.version }}
+
+      - name: Установка зависимостей
+        run: |
+          opm install opm
+          opm install -l --dev
+      
+      - name: Установка дополнительных пакетов
+        if: inputs.additional_oscript_packages != ''
+        run: opm install -l ${{ inputs.additional_oscript_packages }}
+
+      - name: Тестирование
+        run: oscript ${{ inputs.test_script_path}}
