@@ -1,3 +1,6 @@
+// BSLLS:MissingVariablesDescription-off
+// BSLLS:ExportVariables-off
+
 Перем X86 Экспорт;
 Перем X64 Экспорт;
 Перем ARM Экспорт;
