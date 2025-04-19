@@ -10,6 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os: ['ubuntu-latest', 'windows-latest', 'macos-latest', 'macos-13']
         oscript_version: ['stable', 'dev']
     uses: autumn-library/workflows/.github/workflows/test.yml@main
     with:
