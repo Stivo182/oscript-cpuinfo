@@ -1,4 +1,4 @@
-# oscript-cpuinfo
+# cpuinfo
 
 Информация о процессоре через OneScript
 
