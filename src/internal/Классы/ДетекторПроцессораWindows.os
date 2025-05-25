@@ -28,7 +28,8 @@
 		Команда.УстановитьКоманду("wmic");
 	КонецЕсли;
 
-	Команда.ДобавитьПараметр("cpu get Architecture, Name, NumberOfCores, NumberOfLogicalProcessors, MaxClockSpeed /Format:List");
+	Команда.ДобавитьПараметр(
+		"cpu get Architecture, Name, NumberOfCores, NumberOfLogicalProcessors, MaxClockSpeed /Format:List");
 	Команда.Исполнить();
 
 	Возврат Команда.ПолучитьВывод();
