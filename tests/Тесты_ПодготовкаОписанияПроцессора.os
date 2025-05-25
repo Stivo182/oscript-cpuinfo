@@ -42,6 +42,18 @@
 	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz", "Intel Core i7-7700 CPU 3.60GHz (Kaby Lake)");
 	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i7-8650U CPU @ 1.90GHz", "Intel Core i7-8650U CPU 1.90GHz (Kaby Lake R)");
 	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i7-8700K CPU @ 3.70GHz", "Intel Core i7-8700K CPU 3.70GHz (Coffee Lake)");
+	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz", "Intel Core i7-9700 CPU 3.00GHz (Coffee Lake)");
+	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i7-10900K CPU @ 3.60GHz", "Intel Core i7-10900K CPU 3.60GHz (Comet Lake)");
+	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i7-1068NG7 CPU @ 2.30GHz", "Intel Core i7-1068NG7 CPU 2.30GHz (Ice Lake)");
+	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i7-10510Y CPU @ 1.20GHz", "Intel Core i7-10510Y CPU 1.20GHz (Amber Lake Y)");
+	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i9-11900K CPU @ 3.50GHz", "Intel Core i9-11900K CPU 3.50GHz (Rocket Lake)");
+	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i9-11980HK CPU @ 2.60GHz", "Intel Core i9-11980HK CPU 2.60GHz (Tiger Lake-H)");
+	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i9-12900KS CPU @ 3.40GHz", "Intel Core i9-12900KS CPU 3.40GHz (Alder Lake)");
+	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i9-12900HK CPU @ 2.50GHz", "Intel Core i9-12900HK CPU 2.50GHz (Alder Lake-H)");
+	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i9-13900 CPU @ 2.00GHz", "Intel Core i9-13900 CPU 2.00GHz (Raptor Lake)");
+	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i9-13705H CPU @ 2.40GHz", "Intel Core i9-13705H CPU 2.40GHz (Raptor Lake-PX)");
+	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i9-14900K CPU @ 3.20GHz", "Intel Core i9-14900K CPU 3.20GHz (Raptor Lake)");
+	ТестовыеСлучаи.Вставить("Intel(R) Core(TM) i9-14901E CPU @ 2.80GHz", "Intel Core i9-14901E CPU 2.80GHz (Raptor Lake-E)");
 
 	Для Каждого ТестовыйСлучай Из ТестовыеСлучаи Цикл
 
