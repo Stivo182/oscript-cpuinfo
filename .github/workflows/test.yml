@@ -13,5 +13,5 @@ jobs:
         oscript_version: ['stable', 'dev']
     uses: autumn-library/workflows/.github/workflows/test.yml@main
     with:
-      os_versions: '["ubuntu-latest", "windows-2025", "windows-2022", "macos-15", "macos-13"]'
+      os_versions: '["ubuntu-latest", "windows-2025", "windows-2022", "macos-15", "macos-15-intel"]'
       oscript_version: ${{ matrix.oscript_version }}
