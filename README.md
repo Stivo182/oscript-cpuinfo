@@ -2,6 +2,7 @@
 
 [![Release](https://img.shields.io/github/release/Stivo182/oscript-cpuinfo.svg)](https://github.com/Stivo182/oscript-cpuinfo/releases)
 [![Тестирование](https://github.com/Stivo182/oscript-cpuinfo/actions/workflows/test.yml/badge.svg)](https://github.com/Stivo182/oscript-cpuinfo/actions/workflows/test.yml)
+[![Used by](https://litrosbadges.ru/package/cpuinfo.svg)](https://litrosbadges.ru/package/cpuinfo)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Библиотека для получения информации о процессоре на платформе OneScript.
