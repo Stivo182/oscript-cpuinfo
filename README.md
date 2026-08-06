@@ -109,5 +109,6 @@ Intel Core i7-8700 CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 12 logical a
 | Linux    | `/proc/cpuinfo`                    | Файл ядра Linux, содержащий информацию о процессоре.           |
 | Linux    | `lscpu`                            | Утилита для получения структурированных данных о CPU.          |
 | Windows  | COM WMI `Win32_Processor`          | Основной источник без запуска внешнего процесса.               |
-| Windows  | `Get-CimInstance Win32_Processor`  | Резервный источник через PowerShell при недоступности COM WMI. |
+| Windows  | `wmic cpu get`                     | Резервный источник через командную утилиту WMI.                |
+| Windows  | `Get-CimInstance Win32_Processor`  | Резервный источник через PowerShell CIM.             |
 | macOS    | `sysctl`                           | Утилита macOS для доступа к системной информации.              |
