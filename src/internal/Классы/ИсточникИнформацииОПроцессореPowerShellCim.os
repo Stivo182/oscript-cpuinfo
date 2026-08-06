@@ -30,7 +30,9 @@
 	ПутьКPowerShell = ПолучитьПеременнуюСреды("SystemRoot")
 		+ "\System32\WindowsPowerShell\v1.0\powershell.exe";
 
-	Сценарий = "Get-CimInstance Win32_Processor -ErrorAction Stop"
+	Сценарий = "Get-CimInstance Win32_Processor"
+		+ " -Property Architecture, Name, NumberOfCores, NumberOfLogicalProcessors, MaxClockSpeed"
+		+ " -ErrorAction Stop"
 		+ " | Select-Object Architecture, Name, NumberOfCores, NumberOfLogicalProcessors, MaxClockSpeed"
 		+ " | ConvertTo-Json -Compress";
 
