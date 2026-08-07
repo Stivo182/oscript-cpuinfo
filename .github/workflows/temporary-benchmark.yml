@@ -46,19 +46,9 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          opm install opm
+          opm install benchmark@0.9.1
           if ($LASTEXITCODE -ne 0) {
-              throw "Установка OPM завершилась с кодом $LASTEXITCODE"
-          }
-          New-Item -ItemType Directory -Path tooling -Force | Out-Null
-          Push-Location tooling
-          try {
-              opm install -l benchmark@0.9.1
-              if ($LASTEXITCODE -ne 0) {
-                  throw "Установка BenchmarkOneScript завершилась с кодом $LASTEXITCODE"
-              }
-          } finally {
-              Pop-Location
+              throw "Установка BenchmarkOneScript завершилась с кодом $LASTEXITCODE"
           }
 
       - name: Установка зависимостей cpuinfo v1.4.0
@@ -98,6 +88,7 @@ jobs:
           }
 
       - name: Подготовка одинакового бенчмарка
+        id: benchmark_source
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -109,38 +100,24 @@ jobs:
       - name: Запуск cpuinfo v1.4.0
         shell: pwsh
         run: |
-          $executable = if ($IsWindows) { 'benchos.bat' } else { 'benchos' }
-          $benchos = Join-Path $env:GITHUB_WORKSPACE "tooling/oscript_modules/bin/$executable"
           $artifacts = Join-Path $env:GITHUB_WORKSPACE 'results/baseline'
           $benchmark = Join-Path $env:GITHUB_WORKSPACE 'baseline/benchmarks/БенчмаркСозданиеОбъекта.os'
 
-          Push-Location tooling
-          try {
-              & $benchos run -e 'json,md' -a $artifacts $benchmark
-              if ($LASTEXITCODE -ne 0) {
-                  throw "Benchmark cpuinfo v1.4.0 завершился с кодом $LASTEXITCODE"
-              }
-          } finally {
-              Pop-Location
+          benchos run -e 'json,md' -a $artifacts $benchmark
+          if ($LASTEXITCODE -ne 0) {
+              throw "Benchmark cpuinfo v1.4.0 завершился с кодом $LASTEXITCODE"
           }
 
       - name: Запуск текущей версии cpuinfo
-        if: always()
+        if: ${{ !cancelled() && steps.benchmark_source.outcome == 'success' }}
         shell: pwsh
         run: |
-          $executable = if ($IsWindows) { 'benchos.bat' } else { 'benchos' }
-          $benchos = Join-Path $env:GITHUB_WORKSPACE "tooling/oscript_modules/bin/$executable"
           $artifacts = Join-Path $env:GITHUB_WORKSPACE 'results/current'
           $benchmark = Join-Path $env:GITHUB_WORKSPACE 'current/benchmarks/БенчмаркСозданиеОбъекта.os'
 
-          Push-Location tooling
-          try {
-              & $benchos run -e 'json,md' -a $artifacts $benchmark
-              if ($LASTEXITCODE -ne 0) {
-                  throw "Benchmark текущей версии cpuinfo завершился с кодом $LASTEXITCODE"
-              }
-          } finally {
-              Pop-Location
+          benchos run -e 'json,md' -a $artifacts $benchmark
+          if ($LASTEXITCODE -ne 0) {
+              throw "Benchmark текущей версии cpuinfo завершился с кодом $LASTEXITCODE"
           }
 
       - name: Добавление отчетов в сводку
