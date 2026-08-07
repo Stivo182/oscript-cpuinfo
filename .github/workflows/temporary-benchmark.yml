@@ -101,11 +101,42 @@ jobs:
           Copy-Item -LiteralPath 'current/benchmarks/oscript.cfg' `
               -Destination 'baseline/benchmarks/oscript.cfg' -Force
 
+      - name: Сборка сравниваемых пакетов cpuinfo
+        id: benchmark_packages
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path 'packages/baseline' -Force | Out-Null
+          New-Item -ItemType Directory -Path 'packages/current' -Force | Out-Null
+
+          opm build -o packages/baseline baseline
+          if ($LASTEXITCODE -ne 0) {
+              throw "Сборка пакета cpuinfo v1.4.0 завершилась с кодом $LASTEXITCODE"
+          }
+
+          opm build -o packages/current current
+          if ($LASTEXITCODE -ne 0) {
+              throw "Сборка пакета текущей версии cpuinfo завершилась с кодом $LASTEXITCODE"
+          }
+
+          $baselinePackages = @(Get-ChildItem -LiteralPath 'packages/baseline' -Filter 'cpuinfo-*.ospx')
+          $currentPackages = @(Get-ChildItem -LiteralPath 'packages/current' -Filter 'cpuinfo-*.ospx')
+          if ($baselinePackages.Count -ne 1 -or $currentPackages.Count -ne 1) {
+              throw 'Для каждой ревизии должен быть собран ровно один пакет cpuinfo'
+          }
+
       - name: Запуск cpuinfo v1.4.0
         shell: pwsh
         run: |
+          $package = Get-ChildItem -LiteralPath 'packages/baseline' -Filter 'cpuinfo-*.ospx' |
+              Select-Object -First 1
           $artifacts = Join-Path $env:GITHUB_WORKSPACE 'results/baseline'
           $benchmark = Join-Path $env:GITHUB_WORKSPACE 'baseline/benchmarks/БенчмаркСозданиеОбъекта.os'
+
+          opm install --skip-install-deps -f $package.FullName
+          if ($LASTEXITCODE -ne 0) {
+              throw "Установка пакета cpuinfo v1.4.0 завершилась с кодом $LASTEXITCODE"
+          }
 
           benchos run -e 'json,md' -a $artifacts $benchmark
           if ($LASTEXITCODE -ne 0) {
@@ -113,11 +144,18 @@ jobs:
           }
 
       - name: Запуск текущей версии cpuinfo
-        if: ${{ !cancelled() && steps.benchmark_source.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.benchmark_packages.outcome == 'success' }}
         shell: pwsh
         run: |
+          $package = Get-ChildItem -LiteralPath 'packages/current' -Filter 'cpuinfo-*.ospx' |
+              Select-Object -First 1
           $artifacts = Join-Path $env:GITHUB_WORKSPACE 'results/current'
           $benchmark = Join-Path $env:GITHUB_WORKSPACE 'current/benchmarks/БенчмаркСозданиеОбъекта.os'
+
+          opm install --skip-install-deps -f $package.FullName
+          if ($LASTEXITCODE -ne 0) {
+              throw "Установка пакета текущей версии cpuinfo завершилась с кодом $LASTEXITCODE"
+          }
 
           benchos run -e 'json,md' -a $artifacts $benchmark
           if ($LASTEXITCODE -ne 0) {
