@@ -1,0 +1,174 @@
+name: Временное сравнение производительности
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    name: Бенчмарк (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-2025
+          - windows-2022
+          - macos-15
+          - macos-15-intel
+
+    steps:
+      - name: Получение текущей версии
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: current
+
+      - name: Получение cpuinfo v1.4.0
+        uses: actions/checkout@v4
+        with:
+          ref: v1.4.0
+          path: baseline
+
+      - name: Установка OneScript
+        uses: otymko/setup-onescript@v1.5.1
+        with:
+          version: stable
+
+      - name: Установка BenchmarkOneScript v0.9.1
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          opm install opm
+          if ($LASTEXITCODE -ne 0) {
+              throw "Установка OPM завершилась с кодом $LASTEXITCODE"
+          }
+          New-Item -ItemType Directory -Path tooling -Force | Out-Null
+          Push-Location tooling
+          try {
+              opm install -l benchmark@0.9.1
+              if ($LASTEXITCODE -ne 0) {
+                  throw "Установка BenchmarkOneScript завершилась с кодом $LASTEXITCODE"
+              }
+          } finally {
+              Pop-Location
+          }
+
+      - name: Установка зависимостей cpuinfo v1.4.0
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Push-Location baseline
+          try {
+              opm install -l
+              if ($LASTEXITCODE -ne 0) {
+                  throw "Установка зависимостей cpuinfo v1.4.0 завершилась с кодом $LASTEXITCODE"
+              }
+              opm install -l asserts@1.6.2
+              if ($LASTEXITCODE -ne 0) {
+                  throw "Установка asserts 1.6.2 завершилась с кодом $LASTEXITCODE"
+              }
+          } finally {
+              Pop-Location
+          }
+
+      - name: Установка зависимостей текущей версии cpuinfo
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Push-Location current
+          try {
+              opm install -l
+              if ($LASTEXITCODE -ne 0) {
+                  throw "Установка зависимостей текущей версии cpuinfo завершилась с кодом $LASTEXITCODE"
+              }
+              opm install -l asserts@1.6.2
+              if ($LASTEXITCODE -ne 0) {
+                  throw "Установка asserts 1.6.2 завершилась с кодом $LASTEXITCODE"
+              }
+          } finally {
+              Pop-Location
+          }
+
+      - name: Подготовка одинакового бенчмарка
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Copy-Item -LiteralPath 'current/benchmarks/БенчмаркСозданиеОбъекта.os' `
+              -Destination 'baseline/benchmarks/БенчмаркСозданиеОбъекта.os' -Force
+          Copy-Item -LiteralPath 'current/benchmarks/oscript.cfg' `
+              -Destination 'baseline/benchmarks/oscript.cfg' -Force
+
+      - name: Запуск cpuinfo v1.4.0
+        shell: pwsh
+        run: |
+          $executable = if ($IsWindows) { 'benchos.bat' } else { 'benchos' }
+          $benchos = Join-Path $env:GITHUB_WORKSPACE "tooling/oscript_modules/bin/$executable"
+          $artifacts = Join-Path $env:GITHUB_WORKSPACE 'results/baseline'
+          $benchmark = Join-Path $env:GITHUB_WORKSPACE 'baseline/benchmarks/БенчмаркСозданиеОбъекта.os'
+
+          Push-Location tooling
+          try {
+              & $benchos run -e 'json,md' -a $artifacts $benchmark
+              if ($LASTEXITCODE -ne 0) {
+                  throw "Benchmark cpuinfo v1.4.0 завершился с кодом $LASTEXITCODE"
+              }
+          } finally {
+              Pop-Location
+          }
+
+      - name: Запуск текущей версии cpuinfo
+        if: always()
+        shell: pwsh
+        run: |
+          $executable = if ($IsWindows) { 'benchos.bat' } else { 'benchos' }
+          $benchos = Join-Path $env:GITHUB_WORKSPACE "tooling/oscript_modules/bin/$executable"
+          $artifacts = Join-Path $env:GITHUB_WORKSPACE 'results/current'
+          $benchmark = Join-Path $env:GITHUB_WORKSPACE 'current/benchmarks/БенчмаркСозданиеОбъекта.os'
+
+          Push-Location tooling
+          try {
+              & $benchos run -e 'json,md' -a $artifacts $benchmark
+              if ($LASTEXITCODE -ne 0) {
+                  throw "Benchmark текущей версии cpuinfo завершился с кодом $LASTEXITCODE"
+              }
+          } finally {
+              Pop-Location
+          }
+
+      - name: Добавление отчетов в сводку
+        if: always()
+        shell: pwsh
+        run: |
+          "# Сравнение cpuinfo на ${{ matrix.os }}" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+
+          $reports = @(
+              @{ Title = 'cpuinfo v1.4.0'; Path = 'results/baseline' },
+              @{ Title = 'Текущая версия'; Path = 'results/current' }
+          )
+
+          foreach ($report in $reports) {
+              "## $($report.Title)" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+              $files = Get-ChildItem -LiteralPath $report.Path -Filter '*-report.md' -ErrorAction SilentlyContinue
+              if ($files) {
+                  foreach ($file in $files) {
+                      Get-Content -Raw -LiteralPath $file.FullName |
+                          Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+                  }
+              } else {
+                  '_Отчет не сформирован._' | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+              }
+          }
+
+      - name: Публикация отчетов
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpuinfo-benchmark-${{ matrix.os }}
+          path: results
+          if-no-files-found: warn
+          retention-days: 7
