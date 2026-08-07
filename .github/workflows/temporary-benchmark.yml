@@ -1,6 +1,9 @@
 name: Временное сравнение производительности
 
 on:
+  push:
+    branches:
+      - benchmark
   workflow_dispatch:
 
 permissions:
