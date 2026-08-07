@@ -46,6 +46,10 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
+          opm install opm
+          if ($LASTEXITCODE -ne 0) {
+              throw "Обновление OPM завершилось с кодом $LASTEXITCODE"
+          }
           opm install benchmark@0.9.1
           if ($LASTEXITCODE -ne 0) {
               throw "Установка BenchmarkOneScript завершилась с кодом $LASTEXITCODE"
