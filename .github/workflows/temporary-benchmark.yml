@@ -46,7 +46,13 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          opm install opm
+          $oscriptBin = Split-Path (Get-Command oscript).Source -Parent
+          $opmScript = Join-Path (Split-Path $oscriptBin -Parent) 'lib/opm/src/cmd/opm.os'
+          if (-not (Test-Path -LiteralPath $opmScript)) {
+              throw "Не найден сценарий OPM: $opmScript"
+          }
+
+          oscript $opmScript install opm
           if ($LASTEXITCODE -ne 0) {
               throw "Обновление OPM завершилось с кодом $LASTEXITCODE"
           }
