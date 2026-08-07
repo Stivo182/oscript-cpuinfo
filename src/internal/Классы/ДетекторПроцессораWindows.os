@@ -1,3 +1,5 @@
+// BSLLS:LatinAndCyrillicSymbolInWord-off
+
 #Использовать logos
 
 Перем _Лог; // Лог
